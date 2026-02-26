@@ -52,7 +52,8 @@ exports.login = async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    res.json({ message: 'Login successful.', token });
+    const userData = { _id: user._id, name: user.name, email: user.email };
+    res.json({ message: 'Login successful.', token, user: userData });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

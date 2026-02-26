@@ -12,15 +12,11 @@ exports.getAllTransactions = async (req, res) => {
 exports.createTransaction = async (req, res) => {
   try {
     const { type, amount, date, description, categoryId } = req.body;
-    const newTransaction = new Transaction({
-      type,
-      amount,
-      date,
-      description,
-      categoryId,
-      userId: req.userId
-    });
+    const payload = { type, amount, date, description: description || undefined, userId: req.userId };
+    if (categoryId) payload.categoryId = categoryId;
+    const newTransaction = new Transaction(payload);
     const savedTransaction = await newTransaction.save();
+    await savedTransaction.populate('categoryId');
     res.status(201).json(savedTransaction);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -32,7 +28,7 @@ exports.getTransactionById = async (req, res) => {
     const transaction = await Transaction.findOne({
       _id: req.params.id,
       userId: req.userId
-    });
+    }).populate('categoryId');
     if (!transaction) {
       return res.status(404).json({ message: 'Transaction not found.' });
     }
@@ -45,11 +41,17 @@ exports.getTransactionById = async (req, res) => {
 exports.updateTransaction = async (req, res) => {
   try {
     const { type, amount, date, description, categoryId } = req.body;
+    const update = {};
+    if (type !== undefined) update.type = type;
+    if (amount !== undefined) update.amount = amount;
+    if (date !== undefined) update.date = date;
+    if (description !== undefined) update.description = description;
+    if (categoryId !== undefined) update.categoryId = categoryId || null;
     const updatedTransaction = await Transaction.findOneAndUpdate(
       { _id: req.params.id, userId: req.userId },
-      { type, amount, date, description, categoryId },
+      update,
       { new: true }
-    );
+    ).populate('categoryId');
     if (!updatedTransaction) {
       return res.status(404).json({ message: 'Transaction not found.' });
     }

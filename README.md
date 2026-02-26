@@ -35,6 +35,24 @@ A comprehensive full-stack application that helps users track income, expenses, 
 - **Protected Endpoints**  
   Express routes secured with JWT tokens to ensure each user can only access their own data.
 
+- **Protected Routes & AuthContext**  
+  Frontend uses protected routes and global auth state; unauthenticated users are redirected to login.
+
+- **Input Validation**  
+  Backend uses `express-validator` for request validation on signup, login, transactions, and categories.
+
+- **Dashboard Stats**  
+  Dashboard shows total income, expenses, and balance with summary cards.
+
+- **Transaction Filters**  
+  Filter transactions by type (income/expense) and category.
+
+- **Categories Page**  
+  Manage categories (add, delete) from a dedicated Categories page.
+
+- **Error & Loading UX**  
+  Loading spinners, success messages, and user-facing error messages throughout the app.
+
 - **Docker Support** (Optional)  
   Easily run the application (frontend, backend, MongoDB) in separate containers using `docker-compose`.
 
@@ -45,7 +63,8 @@ A comprehensive full-stack application that helps users track income, expenses, 
   - [Node.js](https://nodejs.org/en/) + [Express.js](https://expressjs.com/)  
   - [MongoDB](https://www.mongodb.com/) (with [Mongoose](https://mongoosejs.com/))  
   - [JWT (jsonwebtoken)](https://www.npmjs.com/package/jsonwebtoken) for authentication  
-  - [bcrypt](https://www.npmjs.com/package/bcrypt) for password hashing
+  - [bcrypt](https://www.npmjs.com/package/bcrypt) for password hashing  
+  - [express-validator](https://www.npmjs.com/package/express-validator) for input validation
 
 - **Frontend**  
   - [React](https://reactjs.org/) + [React Router](https://reactrouter.com/)  
@@ -76,19 +95,28 @@ Personal-Finance-Manager/
 │   │   │   ├── User.js                  # Mongoose model for User (name, email, password)
 │   │   │   ├── Transaction.js           # Mongoose model for Transaction (type, amount, date, etc.)
 │   │   │   └── Category.js              # Mongoose model for Category (name, user reference)
-│   │   └── middleware/
-│   │       └── auth.js                  # JWT auth middleware to protect routes
+│   │   ├── middleware/
+│   │   │   ├── auth.js                  # JWT auth middleware to protect routes
+│   │   │   └── validate.js              # express-validator result handler
+│   │   └── validators/
+│   │       ├── userValidator.js         # Signup/login validation
+│   │       ├── transactionValidator.js  # Transaction validation
+│   │       └── categoryValidator.js     # Category validation
 │   ├── package.json                     # Backend dependencies & npm scripts
 │   └── Dockerfile (optional)            # Docker configuration for the backend
 ├── frontend/
 │   ├── public/
 │   │   └── index.html                   # Main HTML for the React app
 │   ├── src/
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx          # Global auth state & login/logout
 │   │   ├── components/
-│   │   │   ├── Dashboard.jsx            # Overview & quick access to transactions
-│   │   │   ├── TransactionList.jsx      # Display list of user transactions
-│   │   │   ├── TransactionForm.jsx      # Form to create or edit a transaction
 │   │   │   ├── AuthForm.jsx             # Signup/Login form for user authentication
+│   │   │   ├── ProtectedRoute.jsx       # Route guard for authenticated users
+│   │   │   ├── Dashboard.jsx            # Overview with income/expense/balance stats
+│   │   │   ├── TransactionList.jsx      # List with filters, edit, delete
+│   │   │   ├── TransactionForm.jsx      # Form to create or edit a transaction
+│   │   │   ├── CategoryList.jsx         # Manage categories (add, delete)
 │   │   │   └── Profile.jsx              # Display and manage user profile info
 │   │   ├── services/
 │   │   │   └── api.js                   # Axios instance setup & request interceptors
@@ -123,13 +151,19 @@ npm install
 ```
 
 ### 4. Configure Environment Variables
-- Create a `.env` file in the `backend` folder (or use another configuration method) with variables like:
+
+**Backend** – Create a `.env` file in the `backend` folder (copy from `backend/.env.example`):
   ```plaintext
-  DB_URI=mongodb://localhost:27017/personal_finance
-  JWT_SECRET=your_jwt_secret
+  DB_URI=mongodb://127.0.0.1:27017/personal_finance
+  JWT_SECRET=your_secure_secret_here
   PORT=5000
   ```
-- Adjust these to match your local setup (e.g., different MongoDB URI, secret, port, etc.).
+
+**Frontend** (optional) – Create a `.env` file in the `frontend` folder (copy from `frontend/.env.example`) to override the API URL:
+  ```plaintext
+  REACT_APP_API_URL=http://localhost:5000/api
+  ```
+  If not set, the frontend uses `http://localhost:5000/api` by default.
 
 
 ## Usage
