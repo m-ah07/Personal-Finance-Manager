@@ -49,11 +49,18 @@ const Dashboard = () => {
   }
 
   const formatCurrency = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+  const hasTransactions = stats.income > 0 || stats.expense > 0;
 
   return (
     <div>
       <h2>Dashboard</h2>
       <p className="text-muted">Welcome to your personal finance overview!</p>
+
+      {!hasTransactions && (
+        <div className="alert alert-info" role="alert">
+          <strong>Get started!</strong> You have no transactions yet. Add your first income or expense to see your financial summary here.
+        </div>
+      )}
 
       <div className="row g-3 mb-4">
         <div className="col-md-4">
